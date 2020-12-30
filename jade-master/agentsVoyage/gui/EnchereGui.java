@@ -44,7 +44,8 @@ public class EnchereGui extends JFrame {
 		addButton.addActionListener(event -> {
 			try {
 				// SEND A GUI EVENT TO THE AGENT !!!
-				GuiEvent guiEv = new GuiEvent(this, AlertAgent.ALERT);
+				GuiEvent guiEv = new GuiEvent(this, 1);
+				System.out.println(guiEv.getType());
 				myAgent.postGuiEvent(guiEv);
 				// END SEND A GUI EVENT TO THE AGENT !!!
 			} catch (Exception e) {
@@ -53,6 +54,21 @@ public class EnchereGui extends JFrame {
 			}
 		});
 		p.add(addButton);
+
+		JButton addButtonVikrey = new JButton("Start Enchere Vikrey");
+		addButtonVikrey.addActionListener(event -> {
+			try {
+				// SEND A GUI EVENT TO THE AGENT !!!
+				GuiEvent guiEv = new GuiEvent(this, 2);
+				System.out.println(guiEv.getType());
+				myAgent.postGuiEvent(guiEv);
+				// END SEND A GUI EVENT TO THE AGENT !!!
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(EnchereGui.this, "Invalid values. " + e.getMessage(), "Error",
+						JOptionPane.ERROR_MESSAGE);
+			}
+		});
+		p.add(addButtonVikrey);
 		getContentPane().add(p, BorderLayout.SOUTH);
 
 

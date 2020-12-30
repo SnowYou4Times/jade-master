@@ -56,7 +56,7 @@ public class TravellerAgent extends GuiAgent {
 	private AID topic_ticketSell;
 	private AID topic_ticketBought;
 	private AID topic_ticketCurrentlySell;
-
+	private AID topic_ticketBet;
 	/** gui */
 	private TravellerGui window;
 
@@ -79,6 +79,7 @@ public class TravellerAgent extends GuiAgent {
 		topic_ticketSell = AgentToolsEA.generateTopicAID(this,"TICKET SELL");
 		topic_ticketBought = AgentToolsEA.generateTopicAID(this,"TICKET BOUGHT");
 		topic_ticketCurrentlySell = AgentToolsEA.generateTopicAID(this, "TICKET CURRENTLY SELL");
+		topic_ticketBet = AgentToolsEA.generateTopicAID(this, "TICKET BET");
 		//ecoute des messages radio
 		addBehaviour(new CyclicBehaviour() {
 			@Override
@@ -86,6 +87,7 @@ public class TravellerAgent extends GuiAgent {
 				var msg_traffic = myAgent.receive(MessageTemplate.MatchTopic(topic_traffic));
 				var msg_ticketBought = myAgent.receive(MessageTemplate.MatchTopic(topic_ticketBought));
 				var msg_ticketCurrentlySell = myAgent.receive(MessageTemplate.MatchTopic(topic_ticketCurrentlySell));
+				var msg_ticketBet = myAgent.receive(MessageTemplate.MatchTopic(topic_ticketBet));
 				if (msg_traffic != null) {
 					println("Message recu sur le topic " + topic_traffic.getLocalName() + ". Contenu " + msg_traffic.getContent()
 							+ " émis par " + msg_traffic.getSender().getLocalName());
@@ -128,8 +130,8 @@ public class TravellerAgent extends GuiAgent {
 										ACLMessage alert = new ACLMessage(ACLMessage.INFORM);
 										alert.setContent("Un ticket supplementaire a la mise en enchere");
 										alert.addReceiver(topic_ticketSell);
-										alert.addUserDefinedParameter("start", (String) j.getStart());
-										alert.addUserDefinedParameter("arrival", (String) j.getStop());
+										alert.addUserDefinedParameter("start", j.getStart());
+										alert.addUserDefinedParameter("arrival", j.getStop());
 										alert.addUserDefinedParameter("departureDate", Integer.toString(j.getDepartureDate()));
 										alert.addUserDefinedParameter("arrivalDate", Integer.toString(j.getArrivalDate()));
 										send(alert);
@@ -150,6 +152,12 @@ public class TravellerAgent extends GuiAgent {
 					if(msg_ticketCurrentlySell.getContent() != null) {
 						betCurrentlyRunning = true;
 						window.println(msg_ticketCurrentlySell.getContent());
+					}
+				}
+				else if (msg_ticketBet != null) {
+					if(msg_ticketBet.getContent() != null) {
+						betCurrentlyRunning = true;
+						window.println(msg_ticketBet.getContent());
 					}
 				}
 				else if (msg_ticketBought != null) {
@@ -243,27 +251,19 @@ public class TravellerAgent extends GuiAgent {
 			//oter les voyages demarrant trop tard (1h30 apres la date de depart souhaitee)
 			journeys.removeIf(j->j.getJourneys().get(0).getDepartureDate()-departure>90);
 			this.preference = preference;
+			//TODO: replace below to make a compromise between cost and confort...
 			switch (preference) {
-			case "duration":
-				Stream<ComposedJourney> strCJ = journeys.stream();
-				OptionalDouble moy = strCJ.mapToInt(ComposedJourney::getDuration).average();
-				final double avg = moy.getAsDouble();
-				println("duree moyenne = " + avg );//+ ", moy au carre = " + avg * avg);
-				journeys.sort(Comparator.comparingInt(ComposedJourney::getDuration));
-				break;
-			case "confort":
-				journeys.sort(Comparator.comparingInt(ComposedJourney::getConfort).reversed());
-				break;
-			case "cost":
-				journeys.sort(Comparator.comparingDouble(ComposedJourney::getCost));
-				break;
-			case "duration-cost":
-				//TODO: replace below to make a compromise between cost and confort...
-				journeys.sort(Comparator.comparingDouble(ComposedJourney::getCost));
-				break;
-			default:
-				journeys.sort(Comparator.comparingDouble(ComposedJourney::getCost));
-				break;
+				case "duration" -> {
+					Stream<ComposedJourney> strCJ = journeys.stream();
+					OptionalDouble moy = strCJ.mapToInt(ComposedJourney::getDuration).average();
+					final double avg = moy.getAsDouble();
+					println("duree moyenne = " + avg);//+ ", moy au carre = " + avg * avg);
+					journeys.sort(Comparator.comparingInt(ComposedJourney::getDuration));
+				}
+				case "confort" -> journeys.sort(Comparator.comparingInt(ComposedJourney::getConfort).reversed());
+				case "cost" -> journeys.sort(Comparator.comparingDouble(ComposedJourney::getCost));
+				case "duration-cost" -> journeys.sort(Comparator.comparingDouble(ComposedJourney::getCost));
+				default -> journeys.sort(Comparator.comparingDouble(ComposedJourney::getCost));
 			}
 			myJourney = journeys.get(0);
 			println("I choose this journey : " + myJourney);
@@ -296,7 +296,6 @@ public class TravellerAgent extends GuiAgent {
 		if (priceBet >= 0) {
 			if (priceBet == 0) {
 				window.println("Enchere Hollandaise : Bet pour le ticket");
-				//TODO : add the behaviour to send an alert to the EnchereAgent to buy the ticket for the current price
 				ACLMessage alert = new ACLMessage(ACLMessage.INFORM);
 				alert.setContent("Achat du ticket");
 				alert.addReceiver(topic_ticketBought);
@@ -304,6 +303,12 @@ public class TravellerAgent extends GuiAgent {
 			}
 			else {
 				window.println("Enchere Vikrey : Bet pour le ticket à hauteur de "+priceBet);
+				ACLMessage alert = new ACLMessage(ACLMessage.INFORM);
+				alert.setContent("Bid pour le ticket");
+				alert.addUserDefinedParameter("agentName", window.getTitle());
+				alert.addUserDefinedParameter("price", String.valueOf(priceBet));
+				alert.addReceiver(topic_ticketBet);
+				send(alert);
 			}
 		}
 		else {

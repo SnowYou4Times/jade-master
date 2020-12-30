@@ -41,19 +41,18 @@ public class LaunchSimu {
 		// add the gui
 		pp.setProperty(Profile.GUI, "true");
 		// add the Topic Management Service
-		pp.setProperty(Profile.SERVICES, "jade.core.messaging.TopicManagementService;jade.core.event.NotificationService");		 
-		
-		var lesAgents = new StringBuilder();
-		lesAgents.append("client1:agents.TravellerAgent;");
-		lesAgents.append("client2:agents.TravellerAgent;");
-		//lesAgents.append("client3:agents.TravellerAgent;");
-		//lesAgents.append("client4:agents.TravellerAgent;");
-		lesAgents.append("agentCar:agents.AgenceAgent(jade-master/agentsVoyage/car.csv);");
-		lesAgents.append("agentBus:agents.AgenceAgent(jade-master/agentsVoyage/bus.csv);");
-		lesAgents.append("agentTrain:agents.AgenceAgent(jade-master/agentsVoyage/train.csv);");
-		lesAgents.append("alert1:agents.AlertAgent;");
-		lesAgents.append("enchere1:agents.EnchereAgent");
-		pp.setProperty(Profile.AGENTS, lesAgents.toString());
+		pp.setProperty(Profile.SERVICES, "jade.core.messaging.TopicManagementService;jade.core.event.NotificationService");
+
+		String lesAgents = "client1:agents.TravellerAgent;" +
+				"client2:agents.TravellerAgent;" +
+				"client3:agents.TravellerAgent;" +
+				"client4:agents.TravellerAgent;" +
+				"agentCar:agents.AgenceAgent(jade-master/agentsVoyage/car.csv);" +
+				"agentBus:agents.AgenceAgent(jade-master/agentsVoyage/bus.csv);" +
+				"agentTrain:agents.AgenceAgent(jade-master/agentsVoyage/train.csv);" +
+				"alert1:agents.AlertAgent;" +
+				"enchere1:agents.EnchereAgent";
+		pp.setProperty(Profile.AGENTS, lesAgents);
 		// create a default Profile
 		var pMain = new ProfileImpl(pp);
 
