@@ -115,7 +115,7 @@ public class TravellerAgent extends GuiAgent {
 									// the journey can no longer be used, need to remove the travel
 									println("Un trajet n'est plus disponible, suppression du trajet complet.");
 									double random = Math.random();
-									System.out.println("random : "+ random);
+									System.out.println("Valeur random : "+ random+" (si random > 0.5, revente ticket)");
 									boolean isTravelNull = false;
 									if (random > 0.5) {
 										println("Recherche d'un nouveau trajet...");
@@ -124,7 +124,6 @@ public class TravellerAgent extends GuiAgent {
 												(Integer) myJourney.getDepartureDate(), (String) preference));
 										if (myJourney == null) {
 											isTravelNull = true;
-											System.out.println("isTravelNull true");
 										}
 									}
 									if (random <= 0.5 || isTravelNull) {
