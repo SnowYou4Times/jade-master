@@ -105,6 +105,9 @@ public class JourneysList implements Serializable {
 			if (j.departureDate >= date
 					&& j.departureDate <= Journey.addTime(date, late)
 					&& j.getNbPlace() > 0) { // MODIFICATION ADDED, NB Places matters !
+
+				System.out.println("Nb place left : "+j.getNbPlace());
+
 				if (j.stop.equalsIgnoreCase(stop)) {
 					currentJourney.add(j);
 					ComposedJourney compo = new ComposedJourney();

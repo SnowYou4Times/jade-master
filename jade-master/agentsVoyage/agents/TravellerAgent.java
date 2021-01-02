@@ -119,9 +119,12 @@ public class TravellerAgent extends GuiAgent {
 									boolean isTravelNull = false;
 									if (random > 0.5) {
 										println("Recherche d'un nouveau trajet...");
-										computeComposedJourney(myJourney.getStart(), myJourney.getStop(), myJourney.getDepartureDate(), preference);
+										addBehaviour(new ContractNetAchat(myAgent, new ACLMessage(ACLMessage.CFP),
+												(String) myJourney.getStart(), (String) myJourney.getStop(),
+												(Integer) myJourney.getDepartureDate(), (String) preference));
 										if (myJourney == null) {
 											isTravelNull = true;
+											System.out.println("isTravelNull true");
 										}
 									}
 									if (random <= 0.5 || isTravelNull) {
@@ -339,6 +342,9 @@ public class TravellerAgent extends GuiAgent {
 		this.catalogs = catalogs;
 	}
 
+	public void setMyJourney(ComposedJourney j) {
+		myJourney = j;
+	}
 
 	public ComposedJourney getMyJourney() {
 		return myJourney;

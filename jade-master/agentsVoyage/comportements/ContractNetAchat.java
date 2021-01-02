@@ -154,6 +154,7 @@ public class ContractNetAchat extends ContractNetInitiator {
         }
         else {
             monAgent.println("Pas de voyage possible...");
+            monAgent.setMyJourney(null);
         }
     }
 
